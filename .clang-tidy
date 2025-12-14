@@ -9,6 +9,7 @@ Checks: >
   -altera-struct-pack-align,
   -altera-id-dependent-backward-branch,
   -fuchsia-default-arguments-calls,
+  -readability-identifier-length,
   readability-identifier-naming
 CheckOptions:
   - key: readability-identifier-naming.VariableCase
