@@ -18,9 +18,7 @@ class ComplexSlae {
     double epsilon = 0.0;
 
     std::vector<int> ig;
-    std::vector<int> idi;
     std::vector<int> jg;
-    std::vector<int> ijg;
 
     std::vector<std::complex<double>> di;
     std::vector<std::complex<double>> gg;

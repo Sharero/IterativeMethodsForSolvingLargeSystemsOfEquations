@@ -40,7 +40,11 @@ void ComplexSlae::inputSLAEData(const std::string& folder_index) {
     kuslau.close();
 
     ig = readDataFromBinaryFile<int>(input_folder / "ig");
-    idi = readDataFromBinaryFile<int>(input_folder / "idi");
+#pragma unroll 4
+    for (auto& elem : ig) {
+        elem -= 1;
+    }
+    std::vector<int> idi = readDataFromBinaryFile<int>(input_folder / "idi");
 
 #pragma unroll 4
     for (auto& elem : idi) {
@@ -51,7 +55,17 @@ void ComplexSlae::inputSLAEData(const std::string& folder_index) {
 
     di = readDataFromBinaryFile<std::complex<double>>(input_folder / "di");
     jg = readDataFromBinaryFile<int>(input_folder / "jg");
-    ijg = readDataFromBinaryFile<int>(input_folder / "ijg");
+#pragma unroll 4
+    for (auto& elem : jg) {
+        elem -= 1;
+    }
+
+    std::vector<int> ijg = readDataFromBinaryFile<int>(input_folder / "ijg");
+
+#pragma unroll 4
+    for (auto& elem : ijg) {
+        elem -= 1;
+    }
 
     const auto ig_size_index = static_cast<std::size_t>(ig.at(size));
     const auto gg_index =
@@ -60,7 +74,14 @@ void ComplexSlae::inputSLAEData(const std::string& folder_index) {
     gg = readDataFromBinaryFile<std::complex<double>>(input_folder / "gg");
     pr = readDataFromBinaryFile<std::complex<double>>(input_folder / "pr");
 
-    x.resize(size);
+    x.resize(size, 0);
+
+    std::ofstream out("data.txt");
+
+#pragma unroll 4
+    for (const auto elem : gg) {
+        out << elem << "\n";
+    }
 
     std::cout << "Read sizes:\n"
               << "  ig:  " << ig.size() << '\n'
@@ -77,6 +98,13 @@ void ComplexSlae::inputSLAEData(const std::string& folder_index) {
 }
 
 void ComplexSlae::solveSLAE() {
-    solver_COCG.init();
-    solver_COCG.solve();
+    solver_COCG.init(ig, jg, di, gg, size);
+    solver_COCG.solve(x, epsilon, pr, maximum_iterations);
+
+    //     std::ofstream out("data.txt");
+
+    // #pragma unroll 4
+    //     for (const auto elem : x) {
+    //         out << elem << "\n";
+    //     }
 }
