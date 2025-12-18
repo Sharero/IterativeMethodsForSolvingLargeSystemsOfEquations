@@ -1,0 +1,12 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{Введение}{3}{Doc-Start}%
+\contentsline {section}{\numberline {1}Теоретическая часть}{4}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Комплексные матрицы и векторы}{4}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Алгоритм COCG}{4}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Алгоритм COCR}{5}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Сглаживание невязки}{6}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Исследование}{8}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Исследование на сходимость методов}{9}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Исследование времени решения СЛАУ в зависимости от количества потоков}{14}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Заключение}{16}{section.3}%
+\contentsline {section}{Приложение A. Текст программы}{17}{section.3}%

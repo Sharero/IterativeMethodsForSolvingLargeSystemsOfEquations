@@ -1,0 +1,130 @@
+\section{Теоретическая часть}
+\subsection{Комплексные матрицы и векторы}
+Поле комплексных чисел можно рассматривать как поле действительных матриц вида:
+\begin{equation}
+	\begin{pmatrix}
+		a & -b \\
+		b & a
+	\end{pmatrix},
+	\quad a, b \in \mathbb{R},
+	\label{eq:1}
+\end{equation}
+в котором роль действительных чисел играют матрицы вида
+$
+	\begin{pmatrix}
+		a & 0 \\
+		0& a
+	\end{pmatrix},
+$
+роль мнимой единицы -- матрица
+$
+\begin{pmatrix}
+	0 & -1 \\
+	1& 0
+\end{pmatrix}.
+$
+Таким образом, комплексные матрицы можно рассматривать как вещественные, состоящие из блок-элементов вида (\ref{eq:1}).
+\par
+Комплексные векторы также можно рассматривать как вещественные: вектору $x \in  \mathbb{C}^n$ будет соответствовать вектор $x^{\prime} \in  \mathbb{R}^{2n}$, причем \par \noindent
+$x^{\prime} = \left( x^{\mathrm{Re}}_1, x^{\mathrm{Im}}_1, x^{\mathrm{Re}}_2, x^{\mathrm{Im}}_2, \ldots , x^{\mathrm{Re}}_n, x^{\mathrm{Im}}_n \right)$.
+\par
+Скалярное произведение $\left(x, y\right)$ воспринимается как скалярное произведение двух комплексных векторов со всеми их свойствами.
+\subsection{Алгоритм COCG}
+Данный метод может быть рассмотрен как обобщение метода сопряженных градиентов для системы вида:
+\begin{equation}
+	Ax = b,
+\end{equation}
+где комплексная матрица $A$ размера $n \times n$ симметричная $\left( A = A^\top \right)$, но в общем случае может не быть эрмитовой $\left( A \neq \overline{A}^\top \right)$. 
+\par
+Алгоритм метода для предобусловленной системы $M^{-1}Ax = M^{-1}b$ может быть записан следующим образом.
+\par
+Выбрать $x^0$.
+\par
+Вычислить 
+\begin{equation}
+	r^0 = b - Ax^0, z^0 = M^{-1}r^0, p^0 = z^0.
+	\label{eq:2}
+\end{equation}
+\par
+Для $j = 0,1,2, \ldots$
+\begin{equation}
+\alpha_j = \frac{\left( \overline{r}^j, z^j \right)}{\left( \overline{Ap}^j, p^j \right)},
+\end{equation}
+\begin{equation}
+	x^{j+1} = x^j + \alpha_j p^j,
+\end{equation}
+\begin{equation}
+	r^{j+1} = r^j - \alpha_j Ap^j,
+\end{equation}
+\begin{equation}
+	z^{j+1} = M^{-1}r^{j+1},
+\end{equation}
+\begin{equation}
+	\beta_j = \frac{\left( \overline{r}^{j+1}, z^{j+1} \right)}{\left( \overline{r}^j, z^j \right)},
+\end{equation}
+\begin{equation}
+	p^{j+1} = z^{j+1} + \beta_j p^j,
+	\label{eq:3}
+\end{equation}
+где вектор $z^j$ -- вектор невязки предобусловленной системы на $j$-ой (текущей) итерации. В апгоритме (\ref{eq:2}) - (\ref{eq:3}) на каждой итерации требуется выполнять только одно матрично-векторное умножение и одно решеин СЛАУ с матрицей предобуславливания $M$. В векторах $x^j$ и $r^j$ хранятся соответственно решение и невязка исходной (не предобусловленной) СЛАУ на $j$-ой (текущей) итерации.
+\subsection{Алгоритм COCR}
+Кроме адаптации метода сопряженных градиентов к решению СЛАУ с комплексно-симметричными матрицами существует обобщенный метод сопряженных невязок. 
+\par
+Схема метода с матрицей предобуславливания $M$ (при применении ее к СЛАУ с матрицей $M^{-1}A$ и при замене естественных скалярных произведений на $\left(x, y\right)_M = \left( Mx, y\right)$) выглядит следующий образом.
+\par
+Выбрать $x^0$.
+\par
+Вычислить 
+\begin{equation}
+	r^0 = b - Ax^0, p^0 = s^0 = M^{-1}r^0, a^0 = z^0 = As^0, \omega^0 = M^{-1}z^0.
+\end{equation}
+\par
+Для $j = 0,1,2, \ldots$
+\begin{equation}
+	\alpha_j = \frac{\left( \overline{a}^j, s^j \right)}{\left( \overline{z}^j, \omega^j \right)},
+\end{equation}
+\begin{equation}
+	x^{j+1} = x^j + \alpha_j p^j,
+\end{equation}
+\begin{equation}
+	r^{j+1} = r^j - \alpha_j z^j,
+\end{equation}
+\begin{equation}
+	s^{j+1} = s^j - \alpha_j \omega^j,
+\end{equation}
+\begin{equation}
+	a^{j+1} = As^{j+1},
+\end{equation}
+\begin{equation}
+	\beta_j = \frac{\left( \overline{a}^{j+1}, s^{j+1} \right)}{\left( \overline{a}^j, s^j \right)},
+\end{equation}
+\begin{equation}
+	p^{j+1} = s^{j+1} + \beta_j p^j,
+\end{equation}
+\begin{equation}
+	z^{j+1} = a^{j+1} + \beta_j z^j,
+	\label{eq:4}
+\end{equation}
+\begin{equation}
+	\omega^{j+1} = M^{-1}z^{j+1},
+\end{equation}
+где вектор $s^j$ -- вектор невязки предобусловленной системы на $j$-ой (текущей) итерации; $a^j = As^j$, $z^j = Ap^j$, $\omega^j = M^{-1}z^j$ -- вспомогательные векторы, причем вектор $z^j = Ap^j$, как и ранее, не вычисляется умножением матрицы на вектор, а пересчитывается рекуррентно по формуле (\ref{eq:4}).
+\subsection{Сглаживание невязки}
+Невязки методов COCG и COCR могут быть подвержены сильным осцилляциям, что затрудняет контроль сходимости методов и завершение процесса по исчерпанию числа итераций. Поэтому для данных методов целесообразно использовать процедуру сглаживания невязки.
+\par
+Суть сглаживания невязки заключается в следующем. Пусть некоторый метод генерирует на $j$-ой итерации приближенное решение $x_j$ и соответствующий вектор невязки $r_j$. Вводятся два вспомогательных вектора $y_j$ и $s_j$ следующим образом:
+\begin{equation}
+	y_0 = x_0, s_0 = r_0,
+\end{equation}
+\begin{equation}
+	y_j = (1 - \eta_j)y_{j-1} + \eta_j x_j, s_j =(1 - \eta_j)s_{j-1} + \eta_j r_j, j = 1,2,\ldots
+\end{equation}
+\par
+Коэффициент $\eta_j \in \mathbb{R}$ выбирается так, чтобы величина $\| f - Ay_j \|^2$ минимизировалась на каждом шаге:
+\begin{equation}
+	\eta_j = - \frac{\left( s_{j-1}, r_j - s_{j-1} \right)}{\left( r_j - s_{j-1}, r_j - s_{j-1} \right)}.
+\end{equation}
+\par
+Для достижения строко монотонной сходимости необходимо обеспечить выполнение условия $\eta_j \in \left[0, 1\right]$, т. е. если $\eta_j < 0$, то следует положить $\eta_j = 0$,если $\eta_j > 1$, то следует положить $\eta_j = 1$.
+\par
+Решением системы на $j$-ой итерации считается вектор $y_j$ с соответствующим вектором невязки $s_j$ (при этом выполняется неравенство $\| s_j \| \leq \| r_j \|$). При этом векторы $x_j$ и $r_j$ вычисляются по исходным формулам итерационного метода, в который встроена процедура сглаживания невязки.

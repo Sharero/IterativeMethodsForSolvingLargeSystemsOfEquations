@@ -1,0 +1,20 @@
+\documentclass[a4paper,14pt]{extarticle}
+
+\usepackage{./styles/document}
+\usepackage{./styles/code}
+\usepackage{./styles/section}
+
+\begin{document}
+	\includepdf[pages=-]{./images/Title.pdf}
+	
+	\tableofcontents
+	\thispagestyle{empty}
+	
+	\input{preamble/preamble}
+	\input{sections/theoretical_part}
+	\input{sections/research}
+	\input{sections/conclusion}
+	
+	\appendix
+	\input{appendices/appendix_A}
+\end{document}

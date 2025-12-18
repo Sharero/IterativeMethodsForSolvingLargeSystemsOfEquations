@@ -1,11 +1,17 @@
+#include <array>
 #include <string>
 
 #include "../include/slae.h"
 
 int main() {
-    const std::string folder_index = "1";
+    for (const std::string& number :
+         std::array<std::string, 3>{"1", "2", "3"}) {
+        const std::string folder_index = number;
 
-    ComplexSlae complex_slae;
+        SLAE slae;
 
-    complex_slae.inputSLAEData(folder_index);
+        slae.inputComplexSLAEData(folder_index);
+        slae.printComplexSLAEDataInformation();
+        slae.solve(folder_index);
+    }
 }
