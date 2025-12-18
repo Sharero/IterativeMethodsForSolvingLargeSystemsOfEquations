@@ -1,39 +1,37 @@
 #ifndef SLAE_H
 #define SLAE_H
 
-#include <complex>
-#include <cstring>
 #include <filesystem>
-#include <fstream>
-#include <iostream>
 #include <string>
-#include <vector>
 
-#include "COCG.h"
+#include "../include/COCG_Di_solver.h"
+#include "../include/COCR_Di_solver.h"
+#include "../include/symmetric_matrix.h"
+#include "../include/vector.h"
 
-class ComplexSlae {
+class SLAE {
    private:
     int size = 0;
-    int maximum_iterations = 0;
     double epsilon = 0.0;
+    int maximum_iterations = 0;
 
-    std::vector<int> ig;
-    std::vector<int> jg;
+    SymmetricMatrix matrix;
+    Vector x;
+    Vector b;
 
-    std::vector<std::complex<double>> di;
-    std::vector<std::complex<double>> gg;
-    std::vector<std::complex<double>> pr;
-    std::vector<std::complex<double>> x;
-
-    SolverCOCG solver_COCG;
+    COCGDiSolver COCG_Di_solver;
+    COCRDiSolver COCR_Di_solver;
 
     template <typename T>
-    std::vector<T> readDataFromBinaryFile(
-        const std::filesystem::path& file_name);
+    void readBinaryFileOfData(const std::filesystem::path& file_name, T* result,
+                              int number_of_records, int len_of_record);
 
    public:
-    void inputSLAEData(const std::string& folder_index);
-    void solveSLAE();
+    void solve(const std::string& folder_index);
+
+    void inputComplexSLAEData(const std::string& folder_index);
+
+    void printComplexSLAEDataInformation();
 };
 
 #endif

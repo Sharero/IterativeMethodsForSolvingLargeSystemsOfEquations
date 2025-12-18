@@ -1,110 +1,157 @@
 #include "../include/slae.h"
 
-#include <complex>
-#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 
-template <typename T>
-std::vector<T> ComplexSlae::readDataFromBinaryFile(
-    const std::filesystem::path& file_name) {
-    const auto file_size_u = std::filesystem::file_size(file_name);
-    const auto count = static_cast<std::size_t>(file_size_u / sizeof(T));
+void SLAE::solve(const std::string& folder_index) {
+    COCG_Di_solver.setSolverParameters(maximum_iterations, epsilon, 10);
+    COCR_Di_solver.setSolverParameters(maximum_iterations, epsilon, 10);
 
-    std::ifstream input_file(file_name, std::ios::binary);
-    std::vector<char> buffer(static_cast<std::size_t>(file_size_u));
+    // auto start_x_for_COCG = x;
+    // auto COCG_results = COCG_Di_solver.solve(matrix, b, start_x_for_COCG,
+    // false); auto end_x_for_COCG = x;
+    // SymmetricMatrix::multiplyMatrixByVector(matrix, start_x_for_COCG,
+    //                                         &end_x_for_COCG);
 
-    input_file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+    // auto start_x_for_COCG_smooth = x;
+    // auto COCG_smooth_results =
+    //     COCG_Di_solver.solve(matrix, b, start_x_for_COCG_smooth, true);
+    // auto end_x_for_COCG_smooth = x;
+    // SymmetricMatrix::multiplyMatrixByVector(matrix, start_x_for_COCG_smooth,
+    //                                         &end_x_for_COCG_smooth);
 
-    std::vector<T> result(count);
+    // auto start_x_for_COCR = x;
+    // auto COCR_results = COCR_Di_solver.solve(matrix, b, start_x_for_COCR,
+    // false); auto end_x_for_COCR = x;
+    // SymmetricMatrix::multiplyMatrixByVector(matrix, start_x_for_COCR,
+    //                                         &end_x_for_COCR);
 
-#pragma unroll 4
-    for (std::size_t i = 0; i < count; ++i) {
-        std::memcpy(&result.at(i), &buffer.at(i * sizeof(T)), sizeof(T));
+    auto start_x_for_COCR_smooth = x;
+    auto COCR_smooth_results =
+        COCR_Di_solver.solve(matrix, b, start_x_for_COCR_smooth, true);
+    auto end_x_for_COCR_smooth = x;
+    SymmetricMatrix::multiplyMatrixByVector(matrix, start_x_for_COCR_smooth,
+                                            &end_x_for_COCR_smooth);
+
+    // {
+    //   auto out = std::ofstream("output/omp8/COCG_Di_" + folder_index +
+    //   ".txt"); out << COCG_results.dump() << "\n"; out <<
+    //   COCG_results.dumpEps() << "\n";
+    // }
+
+    // {
+    //   auto out =
+    //       std::ofstream("output/omp8/COCG_Di_Smooth_" + folder_index +
+    //       ".txt");
+    //   out << COCG_smooth_results.dump() << "\n";
+    //   out << COCG_smooth_results.dumpEps() << "\n";
+    // }
+
+    // {
+    //   auto out = std::ofstream("output/omp8/COCR_Di_" + folder_index +
+    //   ".txt"); out << COCR_results.dump() << "\n"; out <<
+    //   COCR_results.dumpEps() << "\n";
+    // }
+
+    {
+        auto out = std::ofstream("output/omp8/COCR_Di_Smooth_" + folder_index +
+                                 ".txt");
+        out << COCR_smooth_results.dump() << "\n";
+        out << COCR_smooth_results.dumpEps() << "\n";
     }
-
-    return result;
 }
 
-void ComplexSlae::inputSLAEData(const std::string& folder_index) {
+template <typename T>
+void SLAE::readBinaryFileOfData(const std::filesystem::path& file_name,
+                                T* result, int number_of_records,
+                                int len_of_record) {
+    std::ifstream in(file_name, std::ios::binary);
+
+    in.read(reinterpret_cast<char*>(result),
+            static_cast<std::streamsize>(sizeof(T) * len_of_record *
+                                         number_of_records));
+}
+
+void SLAE::printComplexSLAEDataInformation() {
+    std::cout << "SLAE information:" << "\n";
+    std::cout << "\tdi: " << matrix.di.size() << "\n";
+    std::cout << "\tgg: " << matrix.gg.size() << "\n";
+    std::cout << "\tidi: " << matrix.idi.size() << "\n";
+    std::cout << "\tig: " << matrix.ig.size() << "\n";
+    std::cout << "\tigg: " << matrix.igg.size() << "\n";
+    std::cout << "\tjg: " << matrix.jg.size() << "\n";
+    std::cout << "\tx: " << x.size() << "\n";
+    std::cout << "\tb: " << b.size() << "\n";
+}
+
+void SLAE::inputComplexSLAEData(const std::string& folder_index) {
     const std::filesystem::path input_folder =
         std::filesystem::path("data") / "complex" / folder_index;
 
-    const std::filesystem::path kuslau_path = input_folder / "kuslau";
-    std::ifstream kuslau(kuslau_path);
+    std::vector<int> ig;
+    std::vector<int> igg;
+    std::vector<int> jg;
+    std::vector<int> idi;
+    std::vector<double> di;
+    std::vector<double> gg;
+    std::vector<double> pr;
 
-    kuslau >> size >> epsilon >> maximum_iterations;
-    kuslau.close();
-
-    ig = readDataFromBinaryFile<int>(input_folder / "ig");
-#pragma unroll 4
-    for (auto& elem : ig) {
-        elem -= 1;
-    }
-    std::vector<int> idi = readDataFromBinaryFile<int>(input_folder / "idi");
-
-#pragma unroll 4
-    for (auto& elem : idi) {
-        elem -= 1;
+    {
+        std::ifstream kuslau(input_folder / "kuslau");
+        kuslau >> size >> epsilon >> maximum_iterations;
     }
 
-    const auto di_count = static_cast<std::size_t>(idi.at(size)) / 2;
+    ig.resize(size + 1);
+    readBinaryFileOfData(input_folder / "ig", ig.data(), ig.size(), 1);
 
-    di = readDataFromBinaryFile<std::complex<double>>(input_folder / "di");
-    jg = readDataFromBinaryFile<int>(input_folder / "jg");
-#pragma unroll 4
-    for (auto& elem : jg) {
-        elem -= 1;
+    for (auto& i : ig) {
+        --i;
     }
 
-    std::vector<int> ijg = readDataFromBinaryFile<int>(input_folder / "ijg");
+    idi.resize(size + 1);
+    readBinaryFileOfData(input_folder / "idi", idi.data(), idi.size(), 1);
 
-#pragma unroll 4
-    for (auto& elem : ijg) {
-        elem -= 1;
+    for (auto& i : idi) {
+        --i;
     }
 
-    const auto ig_size_index = static_cast<std::size_t>(ig.at(size));
-    const auto gg_index =
-        static_cast<std::size_t>(ijg.at(ig_size_index - 1)) / 2;
+    int ig_n_1 = ig[size];
+    int di_n_1 = idi[size];
 
-    gg = readDataFromBinaryFile<std::complex<double>>(input_folder / "gg");
-    pr = readDataFromBinaryFile<std::complex<double>>(input_folder / "pr");
+    jg.resize(ig_n_1);
+    readBinaryFileOfData(input_folder / "jg", jg.data(), jg.size(), 1);
 
-    x.resize(size, 0);
-
-    std::ofstream out("data.txt");
-
-#pragma unroll 4
-    for (const auto elem : gg) {
-        out << elem << "\n";
+    for (auto& j : jg) {
+        --j;
     }
 
-    std::cout << "Read sizes:\n"
-              << "  ig:  " << ig.size() << '\n'
-              << "  idi: " << idi.size() << '\n'
-              << "  di:  " << di.size() << "\n"
-              << "  jg:  " << jg.size() << '\n'
-              << "  ijg: " << ijg.size() << '\n'
-              << "  gg:  " << gg.size() << "\n"
-              << "  pr:  " << pr.size() << '\n'
-              << "  x:  " << x.size() << "\n";
+    igg.resize(ig_n_1 + 1);
+    readBinaryFileOfData(input_folder / "ijg", igg.data(), igg.size(), 1);
 
-    ijg.clear();
-    idi.clear();
-}
+    for (auto& i : igg) {
+        --i;
+    }
 
-void ComplexSlae::solveSLAE() {
-    solver_COCG.init(ig, jg, di, gg, size);
-    solver_COCG.solve(x, epsilon, pr, maximum_iterations);
+    di.resize(di_n_1);
+    readBinaryFileOfData(input_folder / "di", di.data(), di.size(), 1);
 
-    //     std::ofstream out("data.txt");
+    int gg_count = igg[ig_n_1];
 
-    // #pragma unroll 4
-    //     for (const auto elem : x) {
-    //         out << elem << "\n";
-    //     }
+    gg.resize(gg_count);
+    readBinaryFileOfData(input_folder / "gg", gg.data(), gg.size(), 1);
+
+    pr.resize(size * 2);
+    readBinaryFileOfData(input_folder / "pr", pr.data(), pr.size(), 1);
+
+    matrix.di = std::move(di);
+    matrix.gg = std::move(gg);
+    matrix.idi = std::move(idi);
+    matrix.ig = std::move(ig);
+    matrix.jg = std::move(jg);
+    matrix.igg = std::move(igg);
+
+    b.data = std::move(pr);
+    x.resize(b.size());
 }
